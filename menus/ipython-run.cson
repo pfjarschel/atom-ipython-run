@@ -1,0 +1,13 @@
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'IPython'
+      'submenu': [
+        { 'label': 'Run file', 'command': 'ipython-exec:run-file'}
+        { 'label': 'Open terminal', 'command': 'ipython-exec:open-terminal'}
+        { 'label': 'Set working directory', 'command': 'ipython-exec:setwd'}
+      ]
+    ]
+  }
+]

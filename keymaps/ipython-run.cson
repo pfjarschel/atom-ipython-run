@@ -1,0 +1,4 @@
+'atom-workspace atom-text-editor:not([mini])':
+  'F5': 'ipython-exec:run-file'
+  'F10': 'ipython-exec:open-terminal'
+  'ctrl-F10': 'ipython-exec:setwd'
