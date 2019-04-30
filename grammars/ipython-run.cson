@@ -1,4 +1,4 @@
-'scopeName': 'source.python.ipython-exec'
+'scopeName': 'source.python.ipython-run'
 'name': 'Python (IDE)'
 'fileTypes': [
   'ale'
@@ -6,7 +6,7 @@
 
 'patterns': [
   {
-    'name': 'ipythonexec.cell.python'
+    'name': 'ipythonrun.cell.python'
     'match': '^##.*$'
   }
   {

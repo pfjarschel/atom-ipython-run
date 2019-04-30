@@ -5,14 +5,14 @@
   "description": "Run python file being edited in Atom on an ipython console running in a terminal session",
   "activationCommands": {
     "atom-text-editor": [
-      "ipython-exec:run-file",
-      "ipython-exec:open-terminal",
-      "ipython-exec:setwd"
+      "ipython-run:run-file",
+      "ipython-run:open-terminal",
+      "ipython-run:setwd"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pfjarschel/atom-ipython-exec"
+    "url": "https://github.com/pfjarschel/atom-ipython-run"
   },
   "keywords": [ "python", "ipython", "terminal", "shell", "run", "execute" ],
   "license": "MIT",
