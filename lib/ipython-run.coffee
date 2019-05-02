@@ -73,6 +73,7 @@ module.exports =
       'ipython-run:run-file': => @runFile()
       'ipython-run:open-terminal': => @openTerminal()
       'ipython-run:setwd': => @setWorkingDirectory()
+      'ipython-run:save': => @saveFile()
       'ipython-run:testfun': => @testFunc()
 
 
@@ -153,14 +154,17 @@ module.exports =
 
       if !atom.config.get('ipython-run.focusOnTerminal')
         child_process.execSync( 'xdotool windowactivate '+idAtom )
+
     else if process.platform is "darwin"
         CMD = @osaPrepareCmd( osaCommands.openTerminal, {'myProfile': shellProfile} )
         child_process.execSync( CMD )
         if atom.config.get('ipython-run.focusOnTerminal')
             CMD = @osaPrepareCmd( 'tell application "iTerm" to activate', {} )
             child_process.execSync( CMD )
+
     else if process.platform is "windows"
         console.log("Windows not implemented yet")
+
     else
         console.log("No valid platform detected!")
 
@@ -184,8 +188,6 @@ module.exports =
   sendCode: (code) ->
     return if not code
     if not @isTerminalOpen()
-        if atom.config.get('ipython-run.notifications')
-            atom.notifications.addError("[ipython-run] Open the ipython terminal first")
         return
 
     if process.platform is "darwin" then @osx(code)
@@ -195,8 +197,6 @@ module.exports =
   setWorkingDirectory: ->
     return unless editor = atom.workspace.getActiveTextEditor()
     if not @isTerminalOpen()
-        if atom.config.get('ipython-run.notifications')
-            atom.notifications.addError("[ipython-run] Open the ipython terminal first")
         return
     @changeGrammar()
 
@@ -210,12 +210,17 @@ module.exports =
     @sendCode( ('cd "' + cwd.substring(0, cwd.lastIndexOf('/')) + '"').addSlashes() )
 
 
+  saveFile: ->
+    return unless editor = atom.workspace.getActiveTextEditor()
+    editor.save()
+
   runFile: ->
     return unless editor = atom.workspace.getActiveTextEditor()
+
+    if atom.config.get('ipython-run.saveonrun')
+      @saveFile()
+
     if not @isTerminalOpen()
-        # if atom.config.get('ipython-run.notifications')
-            # atom.notifications.addError("[ipython-run] Open the ipython terminal first")
-        # return
         @openTerminal()
 
     @changeGrammar()
@@ -240,7 +245,6 @@ module.exports =
 
   linux: (codeToExecute) ->
     child_process.execSync( 'xdotool windowactivate '+idTerminal )
-    #child_process.execSync( 'xvkbd -text "'+codeToExecute+'\\n"' )
     child_process.execSync( 'xdotool type --delay 10 --clearmodifiers "'+codeToExecute+'"' )
     child_process.execSync( 'xdotool key --clearmodifiers Return' )
     if !atom.config.get 'ipython-run.focusOnTerminal'
