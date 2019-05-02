@@ -6,8 +6,7 @@
   "activationCommands": {
     "atom-text-editor": [
       "ipython-run:run-file",
-      "ipython-run:open-terminal",
-      "ipython-run:setwd"
+      "ipython-run:testfun"
     ]
   },
   "repository": {

@@ -68,12 +68,12 @@ module.exports =
 
 
   activate: (state) ->
-    console.log("aaa")
     @subscriptions = new CompositeDisposable()
     @subscriptions.add atom.commands.add 'atom-workspace',
       'ipython-run:run-file': => @runFile()
       'ipython-run:open-terminal': => @openTerminal()
       'ipython-run:setwd': => @setWorkingDirectory()
+      'ipython-run:testfun': => @testFunc()
 
 
   deactivate: ->
@@ -105,6 +105,10 @@ module.exports =
         editor.setGrammar( atom.grammars.grammarForScopeName('source.python.ipython-run') )
 
 
+  testFunc: ->
+    console.log("Testing")
+
+
   isTerminalOpen: ->
     if process.platform is "linux"
         try child_process.execSync( "xdotool getwindowname "+idTerminal ); return true
@@ -119,25 +123,59 @@ module.exports =
     return unless editor = atom.workspace.getActiveTextEditor()
     @changeGrammar()
 
-    shellProfile = atom.config.get('ipython-run.shellProfile')
-
     if process.platform is "linux"
-        return if @isTerminalOpen()
-        idAtom = child_process.execSync( 'xdotool getactivewindow' ).toString()
-        CMD = 'gnome-terminal --title=ATOM-IPYTHON-SHELL'  # atom.config.get('ipython-run.terminalToUse')
-        if shellProfile
-            CMD += " --profile="+shellProfile
-        CMD += ' -e ipython &'
-        child_process.exec( CMD )
-        idTerminal = child_process.execSync( 'xdotool search --sync --name ATOM-IPYTHON-SHELL | head -1', {stdio: 'pipe' } ).toString()
-        if !atom.config.get('ipython-run.focusOnTerminal')
-            child_process.execSync( 'xdotool windowactivate '+idAtom )
-    else
+      return if @isTerminalOpen()
+
+      wins1 = child_process.execSync( "wmctrl -lp" ).toString().split("\n")
+      termpids1 = []
+      try termpids1 = child_process.execSync( "pgrep " +  atom.config.get('ipython-run.terminalToUse')).toString().split("\n")
+      termwins1 = []
+      for win in wins1
+        for pid in termpids1
+          if pid != "" and win.indexOf(pid) != -1
+            termwins1.push win.split(" ")[0]
+
+      idAtom = child_process.execSync( 'xdotool getactivewindow' ).toString()
+      CMD = atom.config.get('ipython-run.terminalToUse')
+      CMD += ' -e ipython &'
+      child_process.exec( CMD )
+      sleep(1000)
+
+      wins2 = child_process.execSync( "wmctrl -lp" ).toString().split("\n")
+      termpids2 = []
+      try termpids2 = child_process.execSync( "pgrep " +  atom.config.get('ipython-run.terminalToUse')).toString().split("\n")
+      termwins2 = []
+      for win in wins2
+        for pid in termpids2
+          if pid != "" and termpids1.indexOf(pid) == -1 and win.indexOf(pid) != -1
+            termwins2.push win.split(" ")[0]
+      idTerminal = termwins2[0]
+
+      if !atom.config.get('ipython-run.focusOnTerminal')
+        child_process.execSync( 'xdotool windowactivate '+idAtom )
+    else if process.platform is "darwin"
         CMD = @osaPrepareCmd( osaCommands.openTerminal, {'myProfile': shellProfile} )
         child_process.execSync( CMD )
         if atom.config.get('ipython-run.focusOnTerminal')
             CMD = @osaPrepareCmd( 'tell application "iTerm" to activate', {} )
             child_process.execSync( CMD )
+    else if process.platform is "windows"
+        console.log("Windows not implemented yet")
+    else
+        console.log("No valid platform detected!")
+
+    sleep(100)
+    if atom.config.get('ipython-run.setwd')
+      @setWorkingDirectory()
+      sleep(200)
+    if atom.config.get('ipython-run.runpylab')
+      @sendCode( '%pylab' )
+      sleep(1000)
+    if atom.config.get('ipython-run.autoreload')
+      @sendCode( '%load_ext autoreload' )
+      sleep(100)
+      @sendCode( '%autoreload 2' )
+      sleep(100)
 
     if atom.config.get('ipython-run.notifications')
         atom.notifications.addSuccess("[ipython-run] ipython terminal connected")
@@ -173,26 +211,13 @@ module.exports =
 
 
   runFile: ->
-    console.log('1')
     return unless editor = atom.workspace.getActiveTextEditor()
-    console.log(2)
     if not @isTerminalOpen()
         # if atom.config.get('ipython-run.notifications')
             # atom.notifications.addError("[ipython-run] Open the ipython terminal first")
         # return
         @openTerminal()
-        console.log(3)
-        sleep(100)
-        @setWorkingDirectory()
-        console.log(4)
-        sleep(200)
-        @sendCode( '%pylab' )
-        console.log(5)
-        sleep(3000)
-        @sendCode( '%load_ext autoreload' )
-        sleep(100)
-        @sendCode( '%autoreload 2' )
-        sleep(100)
+
     @changeGrammar()
 
     cwd = editor.getPath()
