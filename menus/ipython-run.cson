@@ -5,7 +5,7 @@
       'label': 'IPython Run'
       'submenu': [
         { 'label': 'Run file', 'command': 'ipython-run:run-file'}
-        { 'label': 'Test', 'command': 'ipython-run:testfun'}
+        #{ 'label': 'Test', 'command': 'ipython-run:testfun'}
       ]
     ]
   }

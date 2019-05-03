@@ -32,37 +32,37 @@ module.exports =
       description: 'If enabled, thr file will be automatically saved prior to running it.'
       type: 'boolean'
       default: true
-      order: 4
+      order: 2
     runpylab:
       title: 'Run IPython with %pylab magic'
       description: 'When opening IPython, %pylab magic will be executed.'
       type: 'boolean'
       default: true
-      order: 2
+      order: 3
     autoreload:
       title: 'Enable IPython autoreload'
       description: 'All libraries and imports are automatically reloaded at each execution.'
       type: 'boolean'
       default: true
-      order: 3
+      order: 4
     setwd:
       title: 'Set working directory to script directory'
       description: 'The IPython working directory will be set to the same as the script directory. If a file from a different path is run, the working directory will be updated accordingly.'
       type: 'boolean'
       default: true
-      order: 4
+      order: 5
     focusOnTerminal:
       title: 'Focus on terminal after sending commands'
       description: 'After code is sent, bring focus to the terminal.'
       type: 'boolean'
       default: false
-      order: 5
+      order: 6
     notifications:
       title: 'Atom notifications'
       type: 'boolean'
       default: true
       description: 'Send notifications in case of errors/warnings'
-      order: 6
+      order: 7
 
   subscriptions: null
 
@@ -213,16 +213,13 @@ module.exports =
   saveFile: ->
     return unless editor = atom.workspace.getActiveTextEditor()
     editor.save()
+    # sleep(2000)
 
-  runFile: ->
+
+  runAction: ->
     return unless editor = atom.workspace.getActiveTextEditor()
-
-    if atom.config.get('ipython-run.saveonrun')
-      @saveFile()
-
     if not @isTerminalOpen()
         @openTerminal()
-
     @changeGrammar()
 
     cwd = editor.getPath()
@@ -233,6 +230,15 @@ module.exports =
     if atom.config.get('ipython-run.notifications')
         atom.notifications.addSuccess("[ipython-run] Running file...")
     @sendCode( '%run "' + cwd + '"' )
+
+
+  runFile: ->
+    return unless editor = atom.workspace.getActiveTextEditor()
+    if atom.config.get('ipython-run.saveonrun') and editor.isModified()
+      @saveFile()
+      setTimeout(@runAction.bind(this), 100)
+    else
+      @runAction()
 
 
   osx: (codeToExecute) ->
