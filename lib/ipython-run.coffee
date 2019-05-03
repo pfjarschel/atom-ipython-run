@@ -213,7 +213,6 @@ module.exports =
   saveFile: ->
     return unless editor = atom.workspace.getActiveTextEditor()
     editor.save()
-    # sleep(2000)
 
 
   runAction: ->
@@ -236,6 +235,8 @@ module.exports =
     return unless editor = atom.workspace.getActiveTextEditor()
     if atom.config.get('ipython-run.saveonrun') and editor.isModified()
       @saveFile()
+      # Atom's editor.save() is only called on the next iteration, so a delayed call is necessary.
+      # .bind(this) is necessary due to obscure wizardry in js setTimeout scope.
       setTimeout(@runAction.bind(this), 100)
     else
       @runAction()
