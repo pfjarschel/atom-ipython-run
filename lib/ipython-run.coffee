@@ -9,6 +9,7 @@ else
     idAtom = ""
     idTerminal = ""
 
+current_wd = ""
 
 String::addSlashes = ->
   @replace(/[\\"]/g, "\\$&").replace /\u0000/g, "\\0"
@@ -169,9 +170,6 @@ module.exports =
         console.log("No valid platform detected!")
 
     sleep(100)
-    if atom.config.get('ipython-run.setwd')
-      @setWorkingDirectory()
-      sleep(200)
     if atom.config.get('ipython-run.runpylab')
       @sendCode( '%pylab' )
       sleep(1000)
@@ -209,6 +207,8 @@ module.exports =
         atom.notifications.addSuccess("[ipython-run] Changing working directory")
     @sendCode( ('cd "' + cwd.substring(0, cwd.lastIndexOf('/')) + '"').addSlashes() )
 
+    current_wd = cwd
+
 
   saveFile: ->
     return unless editor = atom.workspace.getActiveTextEditor()
@@ -226,6 +226,11 @@ module.exports =
         if atom.config.get('ipython-run.notifications')
             atom.notifications.addWarning("[ipython-run] Cannot get working directory from file: save it first")
         return
+    if atom.config.get('ipython-run.setwd')
+        if cwd != current_wd
+            @setWorkingDirectory()
+            sleep(200)
+
     if atom.config.get('ipython-run.notifications')
         atom.notifications.addSuccess("[ipython-run] Running file...")
     @sendCode( '%run "' + cwd + '"' )
