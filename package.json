@@ -1,7 +1,7 @@
 {
   "name": "ipython-run",
   "main": "./lib/ipython-run",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Run python file being edited in Atom on an ipython console running in a terminal session",
   "activationCommands": {
     "atom-text-editor": [
