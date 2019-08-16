@@ -233,7 +233,7 @@ module.exports =
 
     if atom.config.get('ipython-run.notifications')
         atom.notifications.addSuccess("[ipython-run] Running file...")
-    @sendCode( '%run "' + cwd + '"' )
+    @sendCode( ('%run "' + cwd + '"').addSlashes() )
 
 
   runFile: ->
